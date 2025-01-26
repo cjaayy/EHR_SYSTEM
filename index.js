@@ -1,135 +1,88 @@
-// Initialize Lucide icons
-lucide.createIcons();
-
-// DOM Elements
-const newPatientModal = document.getElementById('new-patient-modal');
-const appointmentModal = document.getElementById('appointment-modal');
-const notificationsModal = document.getElementById('notifications-modal');
-const notificationsList = document.getElementById('notifications-list');
-const notificationsModalList = document.getElementById('notifications-modal-list');
-const recentPatientsList = document.getElementById('recent-patients');
-const patientSelect = document.getElementById('patient-select');
-
-// Sample data for recent patients
-const recentPatients = [
-    { name: 'John Doe', lastVisit: '2023-10-01' },
-    { name: 'Jane Smith', lastVisit: '2023-09-25' },
-    { name: 'Alice Johnson', lastVisit: '2023-09-20' }
-];
-
-// Function to populate recent patients list
-function populateRecentPatients() {
-    recentPatientsList.innerHTML = ''; // Clear existing list
-    recentPatients.forEach(patient => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${patient.name} - Last Visit: ${patient.lastVisit}`;
-        recentPatientsList.appendChild(listItem);
-    });
-}
-
-// Enhanced sidebar navigation
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebarItems = document.querySelectorAll('.sidebar-item');
-    
-    function setActiveItem(clickedItem) {
-        // Remove active state from all items
-        sidebarItems.forEach(item => {
-            item.classList.remove('active', 'text-blue-600', 'bg-blue-50');
-        });
-        
-        // Add active state to clicked item
-        clickedItem.classList.add('active', 'text-blue-600', 'bg-blue-50');
-        
-        // Update content based on tab
-        const tabId = clickedItem.getAttribute('data-tab');
-        updateMainContent(tabId);
-    }
-
-    function updateMainContent(tabId) {
-        // You can add specific content updates for each tab here
-        console.log(`Switched to ${tabId} tab`);
-        
-        // Hide all content sections first
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.style.display = 'none';
-        });
-        
-        // Show the selected section
-        const selectedSection = document.getElementById(`${tabId}-section`);
-        if (selectedSection) {
-            selectedSection.style.display = 'block';
-        }
-    }
-
-    // Add click handlers to each sidebar item
-    sidebarItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            setActiveItem(this);
             
-            // Update URL hash
-            const hash = this.getAttribute('href');
-            history.pushState(null, '', hash);
-        });
-
-        // Add hover effects
-        item.addEventListener('mouseenter', function() {
-            if (!this.classList.contains('active')) {
-                this.classList.add('bg-gray-50');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Add your login logic here
+            // For demo purposes, we'll just redirect to the main page
+            if (username && password) {
+                window.location.href = 'index.html';
+            } else {
+                alert('Please enter both username and password');
             }
         });
         
-        item.addEventListener('mouseleave', function() {
-            if (!this.classList.contains('active')) {
-                this.classList.remove('bg-gray-50');
-            }
-        });
-    });
-
-    // Handle browser back/forward buttons
-    window.addEventListener('popstate', function() {
-        const hash = window.location.hash.slice(1);
-        const correspondingItem = document.querySelector(`[data-tab="${hash}"]`);
-        if (correspondingItem) {
-            setActiveItem(correspondingItem);
+    new Vue({
+      el: '#app',
+      data: {
+        searchQuery: '',
+        filterBy: '',
+        patients: [
+          { id: 1, name: 'John Doe', dob: '1980-05-15', condition: 'Diabetes' },
+          { id: 2, name: 'Jane Smith', dob: '1985-09-22', condition: 'Hypertension' },
+          { id: 3, name: 'Alice Johnson', dob: '1990-03-08', condition: 'Asthma' },
+          { id: 4, name: 'Bob Williams', dob: '1975-11-30', condition: 'Arthritis' }
+        ],
+        upcomingAppointments: [
+          { id: 1, patient: { name: 'John Doe' }, date: '2023-04-15' },
+          { id: 2, patient: { name: 'Jane Smith' }, date: '2023-04-20' },
+          { id: 3, patient: { name: 'Alice Johnson' }, date: '2023-04-25' }
+        ],
+        showModal: false,
+        modalTitle: '',
+        modalType: '',
+        selectedPatient: {},
+        rescheduledDate: '',
+        rescheduledTime: '',
+        newPatient: {
+          name: '',
+          dob: '',
+          condition: ''
         }
+      },
+      methods: {
+        filterPatients() {
+          alert(`Filtering patients by: ${this.filterBy} with query: ${this.searchQuery}`);
+        },
+        viewPatientInfo(patient) {
+          this.modalTitle = `Patient Details - ${patient.name}`;
+          this.modalType = 'patientInfo';
+          this.selectedPatient = patient;
+          this.showModal = true;
+        },
+        openAddPatientModal() {
+          this.modalTitle = 'Add New Patient';
+          this.modalType = 'addPatient';
+          this.newPatient = { name: '', dob: '', condition: '' };
+          this.showModal = true;
+        },
+        addPatient() {
+          if (this.newPatient.name && this.newPatient.dob && this.newPatient.condition) {
+            this.patients.push({ ...this.newPatient, id: this.patients.length + 1 });
+            this.closeModal();
+            alert('Patient added successfully!');
+          } else {
+            alert('Please fill in all fields.');
+          }
+        },
+        viewCalendar() {
+          alert('Navigating to calendar view.');
+        },
+        rescheduleAppointment(appointmentId) {
+          const appointment = this.upcomingAppointments.find(a => a.id === appointmentId);
+          this.modalTitle = `Reschedule Appointment for ${appointment.patient.name}`;
+          this.modalType = 'appointment';
+          this.rescheduledDate = moment(appointment.date).format('YYYY-MM-DD');
+          this.rescheduledTime = moment(appointment.date).format('HH:mm');
+          this.showModal = true;
+        },
+        saveRescheduledAppointment() {
+          alert('Appointment rescheduled successfully.');
+          this.closeModal();
+        },
+        closeModal() {
+          this.showModal = false;
+        }
+      }
     });
-
-    // Set initial active state based on URL hash or default to dashboard
-    const initialHash = window.location.hash.slice(1) || 'dashboard';
-    const initialItem = document.querySelector(`[data-tab="${initialHash}"]`);
-    if (initialItem) {
-        setActiveItem(initialItem);
-    }
-
-    // Populate recent patients list
-    populateRecentPatients();
-});
-
-// Function to handle adding a new patient
-function handleAddPatient() {
-    const patientName = document.querySelector('#new-patient-modal input[placeholder="Enter patient name"]').value;
-    const patientDOB = document.querySelector('#new-patient-modal input[type="date"]').value;
-    const patientContact = document.querySelector('#new-patient-modal input[placeholder="Enter contact number"]').value;
-
-    if (patientName && patientDOB && patientContact) {
-        // Add patient to recent patients list
-        const newPatient = { name: patientName, lastVisit: new Date().toISOString().split('T')[0] };
-        recentPatients.push(newPatient);
-        populateRecentPatients();
-
-        // Add patient to patient records
-        const patientRecordsList = document.getElementById('patient-records-list');
-        const recordItem = document.createElement('li');
-        recordItem.textContent = `${patientName} - DOB: ${patientDOB} - Contact: ${patientContact}`;
-        patientRecordsList.appendChild(recordItem);
-
-        alert('Patient added successfully');
-        document.getElementById('new-patient-modal').style.display = 'none';
-    } else {
-        alert('Please fill in all fields');
-    }
-}
-
-// Rest of your existing code...
-// (keep all your other event listeners and functions)

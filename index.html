@@ -1,265 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Porto Circle EHR</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
-    <script src="index.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Porto Circle EHR</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.27.2/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-100">
-    <div class="flex h-screen">
-                <!-- Sidebar -->
-        <div class="w-64 bg-white shadow-lg">
-            <div class="p-4">
-                <h1 class="text-xl font-bold text-blue-600">Porto Circle EHR</h1>
-            </div>
-            <nav class="mt-4" id="sidebar-nav">
-                <a href="#dashboard" class="sidebar-item active flex items-center space-x-3 w-full px-6 py-3 hover:bg-gray-50" data-tab="dashboard">
-                    <i data-lucide="users"></i>
-                    <span class="font-medium">Dashboard</span>
-                </a>
-                <a href="#appointments" class="sidebar-item flex items-center space-x-3 w-full px-6 py-3 hover:bg-gray-50" data-tab="appointments">
-                    <i data-lucide="calendar"></i>
-                    <span class="font-medium">Appointments</span>
-                </a>
-                <a href="#records" class="sidebar-item flex items-center space-x-3 w-full px-6 py-3 hover:bg-gray-50" data-tab="records" id="patient-records-link">
-                    <i data-lucide="file-text"></i>
-                    <span class="font-medium">Patient Records</span>
-                </a>
-                <a href="#settings" class="sidebar-item flex items-center space-x-3 w-full px-6 py-3 hover:bg-gray-50" data-tab="settings">
-                    <i data-lucide="settings"></i>
-                    <span class="font-medium">Settings</span>
-                </a>
-            </nav>
+  <div id="app" class="container mx-auto py-6">
+    <header class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold">Porto Circle EHR</h1>
+      <button class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md" @click="viewCalendar">View Calendar</button>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Patient Search and Filtering -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <h2 class="text-lg font-semibold mb-2">Patient Search and Filtering</h2>
+        <input type="text" v-model="searchQuery" placeholder="Search patients..." class="w-full px-3 py-2 border rounded-md mb-2">
+        <div class="flex space-x-2">
+          <select v-model="filterBy" class="w-full px-3 py-2 border rounded-md">
+            <option value="">Filter by...</option>
+            <option value="name">Name</option>
+            <option value="dob">Date of Birth</option>
+            <option value="condition">Medical Condition</option>
+          </select>
+          <button @click="filterPatients" class="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-md">Search</button>
         </div>
+      </div>
 
-        <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <!-- Header -->
-            <header class="bg-white shadow-sm">
-                <div class="flex items-center justify-between p-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="relative">
-                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input
-                                type="text"
-                                placeholder="Search patients..."
-                                class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <button class="p-2 rounded-full hover:bg-gray-100" id="notifications-btn">
-                            <i data-lucide="bell"></i>
-                        </button>
-                        <button class="p-2 rounded-full hover:bg-gray-100">
-                            <i data-lucide="user"></i>
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Dashboard Content -->
-            <main class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Quick Stats -->
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="p-4 border-b">
-                            <h2 class="text-lg font-semibold">Today's Overview</h2>
-                        </div>
-                        <div class="p-4">
-                            <div class="space-y-4">
-                                <div class="flex justify-between items-center">
-                                    <span>Total Appointments</span>
-                                    <span class="font-bold">12</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span>Waiting Patients</span>
-                                    <span class="font-bold">3</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span>Completed</span>
-                                    <span class="font-bold">5</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Patients -->
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="p-4 border-b">
-                            <h2 class="text-lg font-semibold">Recent Patients</h2>
-                        </div>
-                        <div class="p-4">
-                            <div class="space-y-4" id="recent-patients">
-                                <!-- Populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Notifications -->
-                    <div class="bg-white rounded-lg shadow">
-                        <div class="p-4 border-b">
-                            <h2 class="text-lg font-semibold">Notifications</h2>
-                        </div>
-                        <div class="p-4">
-                            <div class="space-y-4" id="notifications-list">
-                                <!-- Populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="mt-6">
-                    <div class="flex space-x-4">
-                        <button class="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="new-patient-btn">
-                            <i data-lucide="plus"></i>
-                            <span>New Patient</span>
-                        </button>
-                        <button class="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="schedule-appointment-btn">
-                            <i data-lucide="calendar"></i>
-                            <span>Schedule Appointment</span>
-                        </button>
-                    </div>
-                </div>
-            </main>
+      <!-- Detailed Patient Profiles -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <h2 class="text-lg font-semibold mb-2">Detailed Patient Profiles</h2>
+        <div class="space-y-2">
+          <div class="flex justify-between" v-for="patient in patients" :key="patient.id">
+            <span>{{ patient.name }}</span>
+            <button @click="viewPatientInfo(patient)" class="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-md">View</button>
+          </div>
         </div>
+      </div>
+
+      <!-- Scheduling and Calendar -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <h2 class="text-lg font-semibold mb-2">Scheduling and Calendar</h2>
+        <div class="flex justify-between items-center mb-2">
+          <span>Upcoming Appointments</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between" v-for="appointment in upcomingAppointments" :key="appointment.id">
+            <span>{{ appointment.patient.name }} - {{ appointment.date }}</span>
+            <button @click="rescheduleAppointment(appointment.id)" class="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-md">Reschedule</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- New Patient Modal -->
-    <div class="modal" id="new-patient-modal">
-        <div class="modal-content">
-            <h2 class="text-lg font-semibold mb-4">Add New Patient</h2>
-            <div class="space-y-4">
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Full Name</label>
-                    <input type="text" class="w-full p-2 border rounded-md" placeholder="Enter patient name">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Date of Birth</label>
-                    <input type="date" class="w-full p-2 border rounded-md">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Contact Number</label>
-                    <input type="tel" class="w-full p-2 border rounded-md" placeholder="Enter contact number">
-                </div>
-                <button class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700" onclick="handleAddPatient()">
-                    Add Patient
-                </button>
-            </div>
-        </div>
+    <!-- Add Patient Button -->
+    <div class="mt-6">
+      <button class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-md" @click="openAddPatientModal">Add Patient</button>
     </div>
 
-    <!-- Appointment Modal -->
-    <div class="modal" id="appointment-modal">
-        <div class="modal-content">
-            <h2 class="text-lg font-semibold mb-4">Schedule Appointment</h2>
-            <div class="space-y-4">
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Patient</label>
-                    <select class="w-full p-2 border rounded-md" id="patient-select">
-                        <option value="">Select patient</option>
-                    </select>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Date</label>
-                    <input type="date" class="w-full p-2 border rounded-md">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Time</label>
-                    <input type="time" class="w-full p-2 border rounded-md">
-                </div>
-                <button class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700" onclick="handleScheduleAppointment()">
-                    Schedule Appointment
-                </button>
+    <!-- Modal -->
+    <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow p-6 w-full max-w-md">
+          <h2 class="text-lg font-semibold mb-4">{{ modalTitle }}</h2>
+
+          <div v-if="modalType === 'patientInfo'">
+            <div class="mb-4">
+              <span class="block font-medium text-gray-700 mb-2">Name:</span>
+              <p class="text-gray-600">{{ selectedPatient.name }}</p>
             </div>
-        </div>
-    </div>
-
-    <!-- Notifications Modal -->
-    <div class="modal" id="notifications-modal">
-        <div class="modal-content">
-            <h2 class="text-lg font-semibold mb-4">Notifications</h2>
-            <div class="space-y-4" id="notifications-modal-list">
-                <!-- Populated by JavaScript -->
+            <div class="mb-4">
+              <span class="block font-medium text-gray-700 mb-2">Date of Birth:</span>
+              <p class="text-gray-600">{{ selectedPatient.dob }}</p>
             </div>
+            <div class="mb-4">
+              <span class="block font-medium text-gray-700 mb-2">Condition:</span>
+              <p class="text-gray-600">{{ selectedPatient.condition }}</p>
+            </div>
+            <button @click="closeModal" class="bg-gray-300 hover:bg-gray-400 text-black px-3 py-2 rounded-md">Back</button>
+          </div>
+
+          <div v-if="modalType === 'addPatient'">
+            <div class="mb-2">
+              <label class="block font-medium mb-1">Name</label>
+              <input type="text" v-model="newPatient.name" class="w-full px-3 py-2 border rounded-md">
+            </div>
+            <div class="mb-2">
+              <label class="block font-medium mb-1">Date of Birth</label>
+              <input type="date" v-model="newPatient.dob" class="w-full px-3 py-2 border rounded-md">
+            </div>
+            <div class="mb-2">
+              <label class="block font-medium mb-1">Condition</label>
+              <input type="text" v-model="newPatient.condition" class="w-full px-3 py-2 border rounded-md">
+            </div>
+            <div class="flex justify-end">
+              <button @click="addPatient" class="bg-green-500 hover:bg-green-700 text-white px-3 py-2 rounded-md">Add</button>
+              <button @click="closeModal" class="ml-2 bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded-md">Cancel</button>
+            </div>
+          </div>
+
+          <div v-if="modalType === 'appointment'">
+            <div class="mb-2">
+              <label class="block font-medium mb-1">Date</label>
+              <input type="date" v-model="rescheduledDate" class="w-full px-3 py-2 border rounded-md">
+            </div>
+            <div class="mb-4">
+              <label class="block font-medium mb-1">Time</label>
+              <input type="time" v-model="rescheduledTime" class="w-full px-3 py-2 border rounded-md">
+            </div>
+            <div class="flex justify-end">
+              <button @click="saveRescheduledAppointment" class="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-md">Save</button>
+              <button @click="closeModal" class="ml-2 bg-gray-300 hover:bg-gray-400 px-3 py-2 rounded-md">Cancel</button>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        document.getElementById('new-patient-btn').addEventListener('click', function() {
-            document.getElementById('new-patient-modal').style.display = 'block';
-        });
-
-        document.getElementById('schedule-appointment-btn').addEventListener('click', function() {
-            document.getElementById('appointment-modal').style.display = 'block';
-        });
-
-        function handleAddPatient() {
-            const name = document.querySelector('#new-patient-modal input[placeholder="Enter patient name"]').value;
-            const dob = document.querySelector('#new-patient-modal input[type="date"]').value;
-            const contact = document.querySelector('#new-patient-modal input[placeholder="Enter contact number"]').value;
-
-            if (name && dob && contact) {
-                const patientRecordsContainer = document.getElementById('recent-patients');
-                const patientDiv = document.createElement('div');
-                patientDiv.className = 'flex justify-between items-center cursor-pointer';
-                patientDiv.innerHTML = `
-                    <span>${name}</span>
-                    <span class="text-gray-500">${dob}</span>
-                `;
-                patientDiv.addEventListener('click', function() {
-                    alert('Patient: ' + name + '\nDOB: ' + dob + '\nContact: ' + contact);
-                });
-                patientRecordsContainer.appendChild(patientDiv);
-
-                alert('Patient added successfully');
-                document.getElementById('new-patient-modal').style.display = 'none';
-
-                // Scroll to patient records section
-                document.querySelector('[data-tab="records"]').click();
-            } else {
-                alert('Please fill in all fields');
-            }
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        searchQuery: '',
+        filterBy: '',
+        patients: [
+          { id: 1, name: 'John Doe', dob: '1980-05-15', condition: 'Diabetes' },
+          { id: 2, name: 'Jane Smith', dob: '1985-09-22', condition: 'Hypertension' },
+          { id: 3, name: 'Alice Johnson', dob: '1990-03-08', condition: 'Asthma' },
+          { id: 4, name: 'Bob Williams', dob: '1975-11-30', condition: 'Arthritis' }
+        ],
+        upcomingAppointments: [
+          { id: 1, patient: { name: 'John Doe' }, date: '2023-04-15' },
+          { id: 2, patient: { name: 'Jane Smith' }, date: '2023-04-20' },
+          { id: 3, patient: { name: 'Alice Johnson' }, date: '2023-04-25' }
+        ],
+        showModal: false,
+        modalTitle: '',
+        modalType: '',
+        selectedPatient: {},
+        rescheduledDate: '',
+        rescheduledTime: '',
+        newPatient: {
+          name: '',
+          dob: '',
+          condition: ''
         }
-
-        function handleScheduleAppointment() {
-            // Logic to schedule an appointment
-            alert('Appointment scheduled successfully');
-            document.getElementById('appointment-modal').style.display = 'none';
+      },
+      methods: {
+        filterPatients() {
+          alert(`Filtering patients by: ${this.filterBy} with query: ${this.searchQuery}`);
+        },
+        viewPatientInfo(patient) {
+          this.modalTitle = `Patient Details - ${patient.name}`;
+          this.modalType = 'patientInfo';
+          this.selectedPatient = patient;
+          this.showModal = true;
+        },
+        openAddPatientModal() {
+          this.modalTitle = 'Add New Patient';
+          this.modalType = 'addPatient';
+          this.newPatient = { name: '', dob: '', condition: '' };
+          this.showModal = true;
+        },
+        addPatient() {
+          if (this.newPatient.name && this.newPatient.dob && this.newPatient.condition) {
+            this.patients.push({ ...this.newPatient, id: this.patients.length + 1 });
+            this.closeModal();
+            alert('Patient added successfully!');
+          } else {
+            alert('Please fill in all fields.');
+          }
+        },
+        viewCalendar() {
+          alert('Navigating to calendar view.');
+        },
+        rescheduleAppointment(appointmentId) {
+          const appointment = this.upcomingAppointments.find(a => a.id === appointmentId);
+          this.modalTitle = `Reschedule Appointment for ${appointment.patient.name}`;
+          this.modalType = 'appointment';
+          this.rescheduledDate = moment(appointment.date).format('YYYY-MM-DD');
+          this.rescheduledTime = moment(appointment.date).format('HH:mm');
+          this.showModal = true;
+        },
+        saveRescheduledAppointment() {
+          alert('Appointment rescheduled successfully.');
+          this.closeModal();
+        },
+        closeModal() {
+          this.showModal = false;
         }
-
-        // Function to populate recent patients
-        function populateRecentPatients() {
-            const recentPatients = [
-                { name: 'John Doe', date: '2023-10-01' },
-                { name: 'Jane Smith', date: '2023-10-02' },
-                { name: 'Alice Johnson', date: '2023-10-03' }
-            ];
-
-            const recentPatientsContainer = document.getElementById('recent-patients');
-            recentPatientsContainer.innerHTML = '';
-
-            recentPatients.forEach(patient => {
-                const patientDiv = document.createElement('div');
-                patientDiv.className = 'flex justify-between items-center cursor-pointer';
-                patientDiv.innerHTML = `
-                    <span>${patient.name}</span>
-                    <span class="text-gray-500">${patient.date}</span>
-                `;
-                patientDiv.addEventListener('click', function() {
-                    alert('Patient: ' + patient.name + '\nDOB: ' + patient.date);
-                });
-                recentPatientsContainer.appendChild(patientDiv);
-            });
-        }
-
-        // Call the function to populate recent patients on page load
-        document.addEventListener('DOMContentLoaded', populateRecentPatients);
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
