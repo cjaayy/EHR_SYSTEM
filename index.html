@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Porto Circle EHR</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <script src="index.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+                <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <div class="p-4">
+                <h1 class="text-xl font-bold text-blue-600">Porto Circle EHR</h1>
+            </div>
+            <nav class="mt-4" id="sidebar-nav">
+                <a href="#dashboard" class="sidebar-item active flex items-center space-x-3 w-full px-6 py-3 hover:bg-gray-50" data-tab="dashboard">
+                    <i data-lucide="users"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                <a href="#appointments" class="sidebar-item flex items-center space-x-3 w-full px-6 py-3 hover:bg-gray-50" data-tab="appointments">
+                    <i data-lucide="calendar"></i>
+                    <span class="font-medium">Appointments</span>
+                </a>
+                <a href="#records" class="sidebar-item flex items-center space-x-3 w-full px-6 py-3 hover:bg-gray-50" data-tab="records" id="patient-records-link">
+                    <i data-lucide="file-text"></i>
+                    <span class="font-medium">Patient Records</span>
+                </a>
+                <a href="#settings" class="sidebar-item flex items-center space-x-3 w-full px-6 py-3 hover:bg-gray-50" data-tab="settings">
+                    <i data-lucide="settings"></i>
+                    <span class="font-medium">Settings</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Header -->
+            <header class="bg-white shadow-sm">
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input
+                                type="text"
+                                placeholder="Search patients..."
+                                class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="p-2 rounded-full hover:bg-gray-100" id="notifications-btn">
+                            <i data-lucide="bell"></i>
+                        </button>
+                        <button class="p-2 rounded-full hover:bg-gray-100">
+                            <i data-lucide="user"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <main class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Quick Stats -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-4 border-b">
+                            <h2 class="text-lg font-semibold">Today's Overview</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span>Total Appointments</span>
+                                    <span class="font-bold">12</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>Waiting Patients</span>
+                                    <span class="font-bold">3</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>Completed</span>
+                                    <span class="font-bold">5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Patients -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-4 border-b">
+                            <h2 class="text-lg font-semibold">Recent Patients</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-4" id="recent-patients">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-4 border-b">
+                            <h2 class="text-lg font-semibold">Notifications</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-4" id="notifications-list">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mt-6">
+                    <div class="flex space-x-4">
+                        <button class="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="new-patient-btn">
+                            <i data-lucide="plus"></i>
+                            <span>New Patient</span>
+                        </button>
+                        <button class="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" id="schedule-appointment-btn">
+                            <i data-lucide="calendar"></i>
+                            <span>Schedule Appointment</span>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- New Patient Modal -->
+    <div class="modal" id="new-patient-modal">
+        <div class="modal-content">
+            <h2 class="text-lg font-semibold mb-4">Add New Patient</h2>
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Full Name</label>
+                    <input type="text" class="w-full p-2 border rounded-md" placeholder="Enter patient name">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Date of Birth</label>
+                    <input type="date" class="w-full p-2 border rounded-md">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Contact Number</label>
+                    <input type="tel" class="w-full p-2 border rounded-md" placeholder="Enter contact number">
+                </div>
+                <button class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700" onclick="handleAddPatient()">
+                    Add Patient
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div class="modal" id="appointment-modal">
+        <div class="modal-content">
+            <h2 class="text-lg font-semibold mb-4">Schedule Appointment</h2>
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Patient</label>
+                    <select class="w-full p-2 border rounded-md" id="patient-select">
+                        <option value="">Select patient</option>
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Date</label>
+                    <input type="date" class="w-full p-2 border rounded-md">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Time</label>
+                    <input type="time" class="w-full p-2 border rounded-md">
+                </div>
+                <button class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700" onclick="handleScheduleAppointment()">
+                    Schedule Appointment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div class="modal" id="notifications-modal">
+        <div class="modal-content">
+            <h2 class="text-lg font-semibold mb-4">Notifications</h2>
+            <div class="space-y-4" id="notifications-modal-list">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('new-patient-btn').addEventListener('click', function() {
+            document.getElementById('new-patient-modal').style.display = 'block';
+        });
+
+        document.getElementById('schedule-appointment-btn').addEventListener('click', function() {
+            document.getElementById('appointment-modal').style.display = 'block';
+        });
+
+        function handleAddPatient() {
+            const name = document.querySelector('#new-patient-modal input[placeholder="Enter patient name"]').value;
+            const dob = document.querySelector('#new-patient-modal input[type="date"]').value;
+            const contact = document.querySelector('#new-patient-modal input[placeholder="Enter contact number"]').value;
+
+            if (name && dob && contact) {
+                const patientRecordsContainer = document.getElementById('recent-patients');
+                const patientDiv = document.createElement('div');
+                patientDiv.className = 'flex justify-between items-center cursor-pointer';
+                patientDiv.innerHTML = `
+                    <span>${name}</span>
+                    <span class="text-gray-500">${dob}</span>
+                `;
+                patientDiv.addEventListener('click', function() {
+                    alert('Patient: ' + name + '\nDOB: ' + dob + '\nContact: ' + contact);
+                });
+                patientRecordsContainer.appendChild(patientDiv);
+
+                alert('Patient added successfully');
+                document.getElementById('new-patient-modal').style.display = 'none';
+
+                // Scroll to patient records section
+                document.querySelector('[data-tab="records"]').click();
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+
+        function handleScheduleAppointment() {
+            // Logic to schedule an appointment
+            alert('Appointment scheduled successfully');
+            document.getElementById('appointment-modal').style.display = 'none';
+        }
+
+        // Function to populate recent patients
+        function populateRecentPatients() {
+            const recentPatients = [
+                { name: 'John Doe', date: '2023-10-01' },
+                { name: 'Jane Smith', date: '2023-10-02' },
+                { name: 'Alice Johnson', date: '2023-10-03' }
+            ];
+
+            const recentPatientsContainer = document.getElementById('recent-patients');
+            recentPatientsContainer.innerHTML = '';
+
+            recentPatients.forEach(patient => {
+                const patientDiv = document.createElement('div');
+                patientDiv.className = 'flex justify-between items-center cursor-pointer';
+                patientDiv.innerHTML = `
+                    <span>${patient.name}</span>
+                    <span class="text-gray-500">${patient.date}</span>
+                `;
+                patientDiv.addEventListener('click', function() {
+                    alert('Patient: ' + patient.name + '\nDOB: ' + patient.date);
+                });
+                recentPatientsContainer.appendChild(patientDiv);
+            });
+        }
+
+        // Call the function to populate recent patients on page load
+        document.addEventListener('DOMContentLoaded', populateRecentPatients);
+    </script>
+</body>
+</html>

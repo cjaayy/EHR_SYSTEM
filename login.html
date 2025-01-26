@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Porto Circle EHR - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .wave-background {
+            background: linear-gradient(45deg, #C5DBF9 0%, #FFC0CB 100%);
+            position: relative;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40vh;
+            background-color: #1E3A8A;
+            border-radius: 100% 100% 0 0;
+            transform: scaleX(1.5);
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 1px solid #E5E7EB;
+            border-radius: 4px;
+            background-color: #FDE8E8;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .login-input:focus {
+            border-color: #1E3A8A;
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #94A3B8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .login-button:hover {
+            background-color: #64748B;
+        }
+    </style>
+</head>
+<body>
+    <div class="wave-background flex items-center justify-center">
+        <div class="wave"></div>
+        
+        <div class="login-container z-10">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-[#1E3A8A] mb-2">PORTO CIRCLE</h1>
+                <h2 class="text-3xl font-bold text-[#1E3A8A]">EHR</h2>
+            </div>
+            
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <input type="text" id="username" class="login-input" placeholder="Username" required>
+                </div>
+                <div>
+                    <input type="password" id="password" class="login-input" placeholder="Password" required>
+                </div>
+                <div class="mt-6">
+                    <button type="submit" class="login-button">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Add your login logic here
+            // For demo purposes, we'll just redirect to the main page
+            if (username && password) {
+                window.location.href = 'index.html';
+            } else {
+                alert('Please enter both username and password');
+            }
+        });
+    </script>
+</body>
+</html>
